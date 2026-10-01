@@ -1,0 +1,17 @@
+# Mounting row for a dsh profile's cordis.patch.yml.
+#
+# Append this to `$DSH_HOME/profiles/<name>/cordis.patch.yml` to mount the
+# plugin. The package must be resolvable from the profile directory. Either
+# link it into the profile's node_modules:
+#
+#   pnpm add link:/absolute/path/to/dsh-client-ui-gpt-helper --dir "$DSH_HOME/profiles/<name>"
+#
+# or skip the install entirely and name the entry file by path from the patch
+# file's own directory — dsh rewrites `./` and absolute paths to file URLs:
+#
+#   - insert:
+#       - id: gpt-helper
+#         name: './node_modules/dsh-client-ui-gpt-helper/lib/index.js'
+- insert:
+    - id: gpt-helper
+      name: dsh-client-ui-gpt-helper

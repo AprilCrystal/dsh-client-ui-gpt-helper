@@ -1,0 +1,52 @@
+{
+  "name": "dsh-client-ui-gpt-helper",
+  "version": "0.1.0",
+  "description": "ChatGPT-desktop-style model selection and thinking-level control for the DeepSeek Harness Web composer, with an animated fast-mode particle trail",
+  "type": "module",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
+    }
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "plugin",
+    "client-plugin",
+    "ui",
+    "composer",
+    "model-selection",
+    "reasoning-effort"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AprilCrystal/dsh-client-ui-gpt-helper.git"
+  },
+  "homepage": "https://github.com/AprilCrystal/dsh-client-ui-gpt-helper#readme",
+  "bugs": {
+    "url": "https://github.com/AprilCrystal/dsh-client-ui-gpt-helper/issues"
+  },
+  "author": "AprilCrystal",
+  "license": "MIT",
+  "scripts": {
+    "validate": "node scripts/validate-plugin.mjs ."
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "~4.0.4"
+  }
+}

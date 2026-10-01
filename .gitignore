@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Logs and runtime artifacts
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor and OS noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

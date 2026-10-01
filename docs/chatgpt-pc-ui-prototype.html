@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f7f7f8">
+  <title>ChatGPT PC UI 动画原型</title>
+  <meta name="description" content="模型选择、思考强度与快速模式交互动画原型">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2310a37f'/%3E%3Cpath d='M10 16h12M16 10v12' stroke='white' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --bg: #f7f7f8;
+      --surface: rgba(255, 255, 255, .96);
+      --surface-strong: #fff;
+      --text: #202123;
+      --muted: #74767b;
+      --line: rgba(18, 18, 20, .09);
+      --hover: #f2f2f3;
+      --pressed: #eaeaeb;
+      --blue: #0b84ff;
+      --shadow: 0 16px 42px rgba(0, 0, 0, .12), 0 2px 8px rgba(0, 0, 0, .06), 0 0 0 1px rgba(0, 0, 0, .055);
+      --ease-out: cubic-bezier(.2, .8, .2, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 50% 45%, rgba(255,255,255,.92) 0 12rem, rgba(255,255,255,0) 34rem),
+        var(--bg);
+      font: 15px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button { font: inherit; }
+
+    .app-shell {
+      min-height: 100%;
+      display: grid;
+      grid-template-rows: 60px 1fr;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-weight: 600;
+      letter-spacing: -.01em;
+    }
+
+    .brand-mark {
+      width: 27px;
+      height: 27px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: rgba(255,255,255,.75);
+      box-shadow: 0 1px 2px rgba(0,0,0,.03);
+    }
+
+    .window-controls { display: flex; gap: 14px; color: #85878b; }
+    .window-controls span { width: 13px; text-align: center; font-size: 13px; }
+
+    main {
+      position: relative;
+      display: grid;
+      place-items: center;
+      padding: 24px 20px 138px;
+    }
+
+    .empty-state { text-align: center; transform: translateY(-7vh); }
+    .empty-state h1 { margin: 0; font-size: clamp(25px, 4vw, 31px); font-weight: 600; letter-spacing: -.035em; }
+    .empty-state p { margin: 10px 0 0; color: var(--muted); font-size: 14px; }
+
+    .composer-wrap {
+      position: fixed;
+      z-index: 10;
+      left: 50%;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      width: min(760px, calc(100vw - 32px));
+      transform: translateX(-50%);
+    }
+
+    .model-popover {
+      position: absolute;
+      z-index: 20;
+      left: 40px;
+      bottom: calc(100% + 10px);
+      width: min(255px, calc(100vw - 32px));
+      padding: 6px;
+      border-radius: 17px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px) saturate(1.08);
+      -webkit-backdrop-filter: blur(18px) saturate(1.08);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(3px) scale(.985);
+      transform-origin: 34px 100%;
+      transition:
+        opacity 130ms var(--ease-out),
+        transform 160ms var(--ease-out),
+        visibility 0s linear 160ms;
+    }
+
+    .model-popover.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+      transition:
+        opacity 130ms var(--ease-out),
+        transform 160ms var(--ease-out),
+        visibility 0s linear 0s;
+    }
+
+    .thinking-popover {
+      position: absolute;
+      z-index: 21;
+      left: 40px;
+      bottom: calc(100% + 10px);
+      width: min(258px, calc(100vw - 32px));
+      padding: 9px 11px 12px;
+      border-radius: 17px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px) saturate(1.08);
+      -webkit-backdrop-filter: blur(18px) saturate(1.08);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(3px) scale(.985);
+      transform-origin: 44% 100%;
+      transition:
+        opacity 130ms var(--ease-out),
+        transform 160ms var(--ease-out),
+        visibility 0s linear 160ms;
+    }
+
+    .thinking-popover.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+      transition:
+        opacity 130ms var(--ease-out),
+        transform 160ms var(--ease-out),
+        visibility 0s linear 0s;
+    }
+
+    .popover-title {
+      padding: 7px 6px 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .model-option {
+      width: 100%;
+      min-height: 29px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: inherit;
+    }
+
+    .model-option {
+      display: grid;
+      grid-template-columns: 1fr 18px;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 7px;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 80ms ease-out;
+    }
+
+    .model-option:hover, .model-option:focus-visible { background: var(--hover); outline: none; }
+    .model-option:active { background: var(--pressed); }
+
+    .model-group-label {
+      display: grid;
+      gap: 1px;
+      padding: 5px 7px 4px;
+    }
+    .model-group-label strong { font-size: 13px; font-weight: 500; }
+    .model-group-label span { color: #85878b; font-size: 12px; }
+    .model-name { display: block; font-size: 13px; font-weight: 400; }
+    .check { color: #111; opacity: 0; }
+    .model-option.selected .check { opacity: 1; }
+
+    .separator { height: 1px; margin: 6px 8px; background: var(--line); }
+
+    .thinking-head {
+      height: 44px;
+      display: grid;
+      grid-template-columns: 34px 1fr 34px;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 5px;
+      transition: height 140ms var(--ease-out), margin-bottom 140ms var(--ease-out), grid-template-columns 140ms var(--ease-out);
+    }
+
+    .thinking-icon-btn {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 9px;
+      color: #74767b;
+      background: transparent;
+      cursor: pointer;
+      transition: color 100ms ease-out, background-color 80ms ease-out, transform 80ms ease-out, opacity 100ms ease-out;
+    }
+    .thinking-icon-btn:hover { background: var(--hover); }
+    .thinking-icon-btn:active { transform: scale(.97); }
+    .thinking-icon-btn:focus-visible { outline: 3px solid rgba(11,132,255,.22); outline-offset: 1px; }
+    .fast-toggle[aria-pressed="true"] { color: #4d7df4; }
+    .fast-toggle .bolt-fill { opacity: 0; transition: opacity 100ms ease-out; }
+    .fast-toggle[aria-pressed="true"] .bolt-fill { opacity: 1; }
+    .fast-toggle[aria-pressed="true"] .bolt-outline { opacity: 0; }
+
+    .thinking-status {
+      min-width: 0;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      min-height: 42px;
+      padding: 3px 10px;
+      border: 0;
+      border-radius: 8px;
+      color: inherit;
+      background: transparent;
+      font: inherit;
+      text-align: center;
+      cursor: pointer;
+      transition: background-color 80ms ease-out;
+    }
+    .thinking-status:hover { background: #f2f2f3; }
+    .thinking-popover.fast .thinking-status { background: #f1f2f4; }
+    .thinking-title {
+      max-width: 180px;
+      overflow: hidden;
+      color: #4e7fe9;
+      font-size: 14px;
+      font-weight: 650;
+      line-height: 1.15;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      transition: opacity 90ms ease-out, color 120ms ease-out;
+    }
+    .thinking-model {
+      margin-top: 3px;
+      color: #77797e;
+      font-size: 12px;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+    .thinking-popover.ultra .thinking-title {
+      color: #8b48f5;
+      background: linear-gradient(90deg, #5683f6, #7f52f7 48%, #b24dec);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .thinking-popover.quota-notice .thinking-status { background: transparent; }
+    .thinking-popover.quota-notice .thinking-head {
+      height: 34px;
+      grid-template-columns: 0 1fr 0;
+      gap: 0;
+      margin-bottom: 3px;
+    }
+    .thinking-popover.quota-notice .thinking-icon-btn {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(.82);
+    }
+    .thinking-popover.quota-notice .thinking-title {
+      max-width: none;
+      color: #9b4dea;
+      font-size: 13px;
+      font-weight: 600;
+      background: linear-gradient(90deg, #6c63f5, #b647e3);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .thinking-popover.quota-notice .thinking-model { display: none; }
+
+    .slider {
+      --value: 75%;
+      position: relative;
+      height: 26px;
+      cursor: grab;
+      touch-action: none;
+      outline: none;
+    }
+    .slider:active { cursor: grabbing; }
+    .slider:focus-visible::after {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border: 2px solid rgba(11,132,255,.38);
+      border-radius: 17px;
+    }
+    .track, .active-track {
+      position: absolute;
+      top: 1px;
+      left: 0;
+      height: 24px;
+      border-radius: 999px;
+    }
+    .track {
+      width: 100%;
+      overflow: hidden;
+      background: #e8e7e8;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.025);
+    }
+    .active-track {
+      z-index: 1;
+      width: var(--value);
+      overflow: hidden;
+      background: #5184f4;
+    }
+    .slider.ultra .active-track {
+      background: linear-gradient(90deg, #536ae8 0%, #8178fa 42%, #7953e9 72%, #9b4ae7 100%);
+    }
+    .thumb {
+      position: absolute;
+      z-index: 4;
+      top: -1px;
+      left: var(--value);
+      width: 28px;
+      height: 28px;
+      border: 1px solid rgba(0,0,0,.075);
+      border-radius: 50%;
+      background: #fcfcfd;
+      box-shadow: 0 1px 3px rgba(0,0,0,.17), 0 0 0 .5px rgba(0,0,0,.04);
+      transform: translateX(-50%) scale(1);
+      transition: transform 70ms ease-out;
+    }
+    .slider.dragging .thumb { transform: translateX(-50%) scale(.97); }
+    .slider.snapping .thumb { transition: left 130ms var(--ease-out), transform 70ms ease-out; }
+    .slider.snapping .active-track { transition: width 130ms var(--ease-out); }
+
+    .ticks {
+      position: absolute;
+      z-index: 2;
+      inset: 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: none;
+      transition: opacity 100ms ease-out;
+    }
+    .slider.ultra .ticks { opacity: 0; }
+    .tick {
+      width: 4px;
+      height: 4px;
+      border: 0;
+      border-radius: 50%;
+      background: #aaaeb4;
+      transition: width 100ms ease-out, height 100ms ease-out, background-color 100ms ease-out;
+    }
+    .tick.past { background: rgba(255,255,255,.35); }
+    .tick.current { width: 8px; height: 8px; background: rgba(255,255,255,.38); }
+
+    .particle-trail {
+      position: absolute;
+      z-index: 3;
+      top: 1px;
+      left: 0;
+      width: var(--value);
+      height: 24px;
+      overflow: hidden;
+      border-radius: 999px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 120ms ease-out, width 130ms var(--ease-out);
+    }
+    .slider.fast .particle-trail,
+    .slider.ultra .particle-trail { opacity: 1; }
+    .particle {
+      --x: 50;
+      --y: 50;
+      --pw: 2px;
+      --ph: 2px;
+      --d: 0ms;
+      --dur: 1400ms;
+      --tx: -12px;
+      --ty: 0px;
+      --rot: 0deg;
+      --peak: .85;
+      position: absolute;
+      left: calc(var(--x) * 1%);
+      top: calc(var(--y) * 1%);
+      width: var(--pw);
+      height: var(--ph);
+      border-radius: 50%;
+      background: rgba(255,255,255,.96);
+      box-shadow: 0 0 2.5px rgba(255,255,255,.7);
+      opacity: 0;
+      transform-origin: 50% 50%;
+      animation: trail-drift var(--dur) linear infinite;
+      animation-delay: var(--d);
+    }
+    .particle.streak { border-radius: 999px; }
+    .slider.ultra:not(.fast) .particle {
+      display: none;
+      left: calc(var(--idle-x) * 1%);
+      top: calc(var(--idle-y) * 1%);
+      width: var(--idle-size);
+      height: var(--idle-size);
+      border-radius: 50%;
+      background: rgba(255,255,255,.84);
+      box-shadow: 0 0 1.5px rgba(255,255,255,.25);
+      animation-name: particle-tremble;
+      animation-duration: var(--idle-duration);
+      animation-timing-function: ease-in-out;
+    }
+    .slider.ultra:not(.fast) .particle:nth-child(odd) { display: block; }
+    .slider.ultra:not(.fast) .particle-trail { opacity: .76; }
+    .slider.ultra:not(.fast) .active-track {
+      background: linear-gradient(90deg, #3941c4 0%, #a987ff 52%, #7d57eb 100%);
+    }
+    @keyframes trail-drift {
+      0% { opacity: 0; transform: translate(5px, 0) rotate(var(--rot)) scale(.45); }
+      14% { opacity: var(--peak); }
+      42% { opacity: .7; }
+      72% { opacity: .32; }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(.25); }
+    }
+    @keyframes particle-tremble {
+      0%, 100% { opacity: .24; transform: translate(-.15px, .06px) scale(.92); }
+      25% { opacity: .38; transform: translate(.18px, -.1px) scale(.97); }
+      50% { opacity: var(--idle-peak); transform: translate(-.05px, .16px) scale(1); }
+      75% { opacity: .32; transform: translate(.1px, .03px) scale(.95); }
+    }
+
+    .composer {
+      min-height: 106px;
+      padding: 14px 14px 11px;
+      border: 1px solid rgba(0,0,0,.075);
+      border-radius: 25px;
+      background: rgba(255,255,255,.93);
+      box-shadow: 0 5px 20px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.03);
+      backdrop-filter: blur(15px);
+    }
+    .prompt {
+      width: 100%;
+      height: 45px;
+      padding: 2px 4px;
+      resize: none;
+      border: 0;
+      outline: 0;
+      color: var(--text);
+      background: transparent;
+      font: inherit;
+      line-height: 1.55;
+    }
+    .prompt::placeholder { color: #929498; }
+    .composer-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .left-actions, .right-actions { display: flex; align-items: center; gap: 6px; }
+    .icon-btn, .thinking-trigger, .send-btn {
+      height: 34px;
+      border: 0;
+      cursor: pointer;
+      transition: background-color 80ms ease-out, transform 80ms ease-out;
+    }
+    .icon-btn {
+      width: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #4b4d50;
+      background: transparent;
+    }
+    .icon-btn:hover { background: var(--hover); }
+    .icon-btn:focus-visible { outline: 3px solid rgba(11,132,255,.22); }
+    .thinking-trigger {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 10px;
+      border-radius: 10px;
+      color: #343538;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 400;
+    }
+    .thinking-trigger:hover, .thinking-trigger[aria-expanded="true"] { background: var(--hover); }
+    .trigger-bolt { display: none; color: #242527; }
+    .thinking-trigger.fast .trigger-bolt { display: block; }
+    .trigger-level { color: #585b60; }
+    .thinking-trigger.ultra .trigger-level { color: #8a48ea; }
+    .trigger-caret { color: #77797d; transition: transform 150ms var(--ease-out); }
+    .thinking-trigger[aria-expanded="true"] .trigger-caret { transform: rotate(180deg); }
+    .thinking-trigger:focus-visible { outline: 3px solid rgba(11,132,255,.22); }
+    .send-btn {
+      width: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #fff;
+      background: #252628;
+    }
+    .send-btn:hover { background: #101112; }
+    .send-btn:active, .icon-btn:active { transform: scale(.97); }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      top: 22px;
+      z-index: 30;
+      padding: 9px 13px;
+      border-radius: 11px;
+      color: #fff;
+      background: rgba(31,32,34,.92);
+      box-shadow: 0 6px 20px rgba(0,0,0,.15);
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -4px);
+      transition: opacity 130ms var(--ease-out), transform 160ms var(--ease-out);
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 540px) {
+      .topbar { padding: 0 16px; }
+      .composer-wrap { width: calc(100vw - 20px); bottom: max(10px, env(safe-area-inset-bottom)); }
+      .composer { border-radius: 21px; }
+      .model-popover { left: 0; width: min(255px, 100%); }
+      .thinking-popover { left: 0; width: min(258px, 100%); }
+      .empty-state { transform: translateY(-12vh); }
+      .window-controls { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">✦</span><span>ChatGPT</span></div>
+      <div class="window-controls" aria-hidden="true"><span>—</span><span>□</span><span>×</span></div>
+    </header>
+
+    <main>
+      <section class="empty-state" aria-labelledby="welcome-title">
+        <h1 id="welcome-title">有什么可以帮忙的？</h1>
+        <p>打开下方模型选择器，体验完整交互</p>
+      </section>
+    </main>
+
+    <div class="composer-wrap">
+      <section class="model-popover" id="modelPopover" role="menu" aria-label="模型选择">
+        <div class="popover-title">选择模型</div>
+        <div class="model-group-label"><strong>默认</strong><span>推荐模型集</span></div>
+        <button class="model-option" type="button" role="menuitemradio" aria-checked="false" data-model="GPT-6.1 Sol"><span class="model-name">GPT-6.1 Sol</span><span class="check" aria-hidden="true">✓</span></button>
+        <button class="model-option" type="button" role="menuitemradio" aria-checked="false" data-model="GPT-6 Astra"><span class="model-name">GPT-6 Astra</span><span class="check" aria-hidden="true">✓</span></button>
+        <button class="model-option" type="button" role="menuitemradio" aria-checked="false" data-model="GPT-6 Sol"><span class="model-name">GPT-6 Sol</span><span class="check" aria-hidden="true">✓</span></button>
+        <button class="model-option" type="button" role="menuitemradio" aria-checked="false" data-model="GPT-6 Luna"><span class="model-name">GPT-6 Luna</span><span class="check" aria-hidden="true">✓</span></button>
+        <button class="model-option selected" type="button" role="menuitemradio" aria-checked="true" data-model="GPT-5.6 Sol"><span class="model-name">GPT-5.6 Sol</span><span class="check" aria-hidden="true">✓</span></button>
+        <button class="model-option" type="button" role="menuitemradio" aria-checked="false" data-model="GPT-5.6 Terra"><span class="model-name">GPT-5.6 Terra</span><span class="check" aria-hidden="true">✓</span></button>
+        <button class="model-option" type="button" role="menuitemradio" aria-checked="false" data-model="GPT-5.6 Luna"><span class="model-name">GPT-5.6 Luna</span><span class="check" aria-hidden="true">✓</span></button>
+        <button class="model-option" type="button" role="menuitemradio" aria-checked="false" data-model="GPT-5.5"><span class="model-name">GPT-5.5</span><span class="check" aria-hidden="true">✓</span></button>
+      </section>
+
+      <section class="thinking-popover" id="thinkingPopover" role="dialog" aria-label="思考强度与快速模式">
+        <div class="thinking-head">
+          <button class="thinking-icon-btn fast-toggle" id="fastToggle" type="button" aria-pressed="false" aria-label="开启快速模式">
+            <svg width="18" height="18" viewBox="4.5 2 15 20" aria-hidden="true">
+              <path class="bolt-outline" d="M13.2 2.8 5.8 13h5l-1 8.2 8.4-11.1h-5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              <path class="bolt-fill" d="M13.2 2.8 5.8 13h5l-1 8.2 8.4-11.1h-5z" fill="currentColor"/>
+            </svg>
+          </button>
+          <button class="thinking-status" id="modelPicker" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="modelPopover">
+            <span class="thinking-title" id="thinkingValue">高</span>
+            <span class="thinking-model"><span id="thinkingModel">GPT-5.6 Sol</span> ›</span>
+          </button>
+          <button class="thinking-icon-btn" id="resetThinking" type="button" aria-label="重置思考设置">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.4 9A8 8 0 1 1 4 15.6"/><path d="M4.4 4.8V9h4.2"/></svg>
+          </button>
+        </div>
+        <div class="slider" id="thinkingSlider" role="slider" tabindex="0" aria-label="思考强度" aria-valuemin="0" aria-valuemax="4" aria-valuenow="3" aria-valuetext="高">
+          <div class="track"></div>
+          <div class="active-track"></div>
+          <div class="ticks" aria-hidden="true"><i class="tick"></i><i class="tick"></i><i class="tick"></i><i class="tick current"></i><i class="tick"></i></div>
+          <div class="particle-trail" id="particleTrail" aria-hidden="true"></div>
+          <div class="thumb"></div>
+        </div>
+      </section>
+
+      <section class="composer" aria-label="消息输入区">
+        <textarea class="prompt" aria-label="消息" placeholder="给 ChatGPT 发送消息"></textarea>
+        <div class="composer-actions">
+          <div class="left-actions">
+            <button class="icon-btn" type="button" aria-label="添加附件">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            <button class="thinking-trigger" id="thinkingTrigger" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="thinkingPopover">
+              <svg class="trigger-bolt" width="14" height="14" viewBox="4.5 2 15 20" fill="currentColor" aria-hidden="true"><path d="M13.2 2.8 5.8 13h5l-1 8.2 8.4-11.1h-5z"/></svg>
+              <span id="selectedModel">GPT-5.6 Sol</span>
+              <span class="trigger-level" id="thinkingTriggerLabel">高</span>
+              <svg class="trigger-caret" width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 8 4 4 4-4"/></svg>
+            </button>
+          </div>
+          <div class="right-actions">
+            <button class="icon-btn" type="button" aria-label="语音输入">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M9 21h6"/></svg>
+            </button>
+            <button class="send-btn" type="button" aria-label="发送消息">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 12 6-6 6 6M12 6v13"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      const modelPopover = document.querySelector('#modelPopover');
+      const modelPicker = document.querySelector('#modelPicker');
+      const thinkingTrigger = document.querySelector('#thinkingTrigger');
+      const thinkingPopover = document.querySelector('#thinkingPopover');
+      const selectedModel = document.querySelector('#selectedModel');
+      const thinkingModel = document.querySelector('#thinkingModel');
+      const modelOptions = [...document.querySelectorAll('.model-option')];
+      const fastToggle = document.querySelector('#fastToggle');
+      const resetThinking = document.querySelector('#resetThinking');
+      const slider = document.querySelector('#thinkingSlider');
+      const valueLabel = document.querySelector('#thinkingValue');
+      const triggerLabel = document.querySelector('#thinkingTriggerLabel');
+      const ticks = [...slider.querySelectorAll('.tick')];
+      const particleTrail = document.querySelector('#particleTrail');
+      const toast = document.querySelector('#toast');
+      const levels = ['最少', '较少', '标准', '高', 'Ultra'];
+      const stepRatios = [.055, .25, .5, .75, .945];
+      let currentStep = 3;
+      let dragging = false;
+      let activePointerId = null;
+      let fastEnabled = false;
+      let toastTimer;
+      let quotaStartTimer;
+      let quotaTimer;
+
+      function setModelPopover(open, returnFocus = false) {
+        modelPopover.classList.toggle('open', open);
+        modelPicker.setAttribute('aria-expanded', String(open));
+        if (open) {
+          setThinkingPopover(false);
+          requestAnimationFrame(() => modelPopover.querySelector('.selected')?.focus({ preventScroll: true }));
+        } else if (returnFocus) {
+          setThinkingPopover(true);
+          requestAnimationFrame(() => modelPicker.focus({ preventScroll: true }));
+        }
+      }
+
+      function setThinkingPopover(open, returnFocus = false) {
+        thinkingPopover.classList.toggle('open', open);
+        thinkingTrigger.setAttribute('aria-expanded', String(open));
+        if (open) {
+          setModelPopover(false);
+        } else if (returnFocus) {
+          thinkingTrigger.focus({ preventScroll: true });
+        }
+      }
+
+      thinkingTrigger.addEventListener('click', () => setThinkingPopover(!thinkingPopover.classList.contains('open')));
+      modelPicker.addEventListener('click', () => setModelPopover(true));
+
+      document.addEventListener('pointerdown', event => {
+        if (modelPopover.classList.contains('open') && !modelPopover.contains(event.target)) {
+          setModelPopover(false);
+        }
+        if (thinkingPopover.classList.contains('open') && !thinkingPopover.contains(event.target) && !thinkingTrigger.contains(event.target)) {
+          setThinkingPopover(false);
+        }
+      });
+
+      document.addEventListener('keydown', event => {
+        if (event.key !== 'Escape') return;
+        if (thinkingPopover.classList.contains('open')) {
+          event.preventDefault();
+          setThinkingPopover(false, true);
+        } else if (modelPopover.classList.contains('open')) {
+          event.preventDefault();
+          setModelPopover(false, true);
+        }
+      });
+
+      modelOptions.forEach(option => option.addEventListener('click', () => {
+        modelOptions.forEach(item => {
+          const active = item === option;
+          item.classList.toggle('selected', active);
+          item.setAttribute('aria-checked', String(active));
+        });
+        selectedModel.textContent = option.dataset.model;
+        thinkingModel.textContent = option.dataset.model;
+        showToast(`已切换到 ${option.dataset.model}`);
+        setModelPopover(false, true);
+      }));
+
+      function setFastMode(enabled, announce = true) {
+        fastEnabled = enabled;
+        fastToggle.setAttribute('aria-pressed', String(enabled));
+        fastToggle.setAttribute('aria-label', enabled ? '关闭快速模式' : '开启快速模式');
+        thinkingPopover.classList.toggle('fast', enabled);
+        slider.classList.toggle('fast', enabled);
+        thinkingTrigger.classList.toggle('fast', enabled);
+        if (announce) showToast(enabled ? '快速模式已开启' : '快速模式已关闭');
+      }
+
+      fastToggle.addEventListener('click', () => setFastMode(!fastEnabled));
+      resetThinking.addEventListener('click', () => {
+        setFastMode(false, false);
+        setStep(3, true, false);
+        showToast('已恢复高 · 标准速度');
+      });
+
+      const particleSizes = [1.7, 2, 2.35, 2.75, 3.2];
+      const particlePattern = Array.from({ length: 42 }, (_, index) => {
+        const size = particleSizes[index % particleSizes.length];
+        const streak = index % 4 === 0 || index % 7 === 0;
+        return {
+          x: 4 + ((index * 37) % 92),
+          y: 13 + ((index * 29) % 68),
+          width: streak ? size * 2.15 : size,
+          height: streak ? Math.max(.8, size * .55) : size,
+          delay: -((index * 173) % 1250),
+          duration: 620 + ((index * 113) % 630),
+          travelX: -(10 + ((index * 17) % 20)),
+          travelY: -4 + ((index * 11) % 9),
+          rotation: streak ? -48 + ((index * 23) % 78) : 0,
+          peak: .66 + (((index * 7) % 29) / 100),
+          idleX: 5 + ((index * 41) % 84),
+          idleY: 30 + ((index * 17) % 41),
+          idleSize: index % 6 === 0 ? 1.9 : 1.15 + ((index % 3) * .18),
+          idleDuration: 2100 + ((index * 131) % 1100),
+          idlePeak: .5 + (((index * 7) % 24) / 100),
+          streak
+        };
+      });
+      particlePattern.forEach(preset => {
+        const particle = document.createElement('i');
+        particle.className = `particle${preset.streak ? ' streak' : ''}`;
+        particle.style.setProperty('--x', preset.x);
+        particle.style.setProperty('--y', preset.y);
+        particle.style.setProperty('--pw', `${preset.width}px`);
+        particle.style.setProperty('--ph', `${preset.height}px`);
+        particle.style.setProperty('--d', `${preset.delay}ms`);
+        particle.style.setProperty('--dur', `${preset.duration}ms`);
+        particle.style.setProperty('--tx', `${preset.travelX}px`);
+        particle.style.setProperty('--ty', `${preset.travelY}px`);
+        particle.style.setProperty('--rot', `${preset.rotation}deg`);
+        particle.style.setProperty('--peak', preset.peak);
+        particle.style.setProperty('--idle-x', preset.idleX);
+        particle.style.setProperty('--idle-y', preset.idleY);
+        particle.style.setProperty('--idle-size', `${preset.idleSize}px`);
+        particle.style.setProperty('--idle-duration', `${preset.idleDuration}ms`);
+        particle.style.setProperty('--idle-peak', preset.idlePeak);
+        particleTrail.appendChild(particle);
+      });
+
+      function positionFromEvent(event) {
+        const rect = slider.getBoundingClientRect();
+        return Math.max(stepRatios[0], Math.min(stepRatios[4], (event.clientX - rect.left) / rect.width));
+      }
+
+      function paintContinuous(ratio) {
+        slider.style.setProperty('--value', `${ratio * 100}%`);
+        const nearest = Math.round(ratio * 4);
+        renderLevel(nearest, false);
+      }
+
+      function renderLevel(step, committed = true) {
+        const ultra = step === 4;
+        thinkingPopover.classList.toggle('ultra', ultra);
+        slider.classList.toggle('ultra', ultra);
+        thinkingTrigger.classList.toggle('ultra', ultra);
+        if (!thinkingPopover.classList.contains('quota-notice')) valueLabel.textContent = levels[step];
+        triggerLabel.textContent = levels[step];
+        ticks.forEach((tick, index) => {
+          tick.classList.toggle('past', index < step);
+          tick.classList.toggle('current', index === step);
+        });
+        if (committed) {
+          slider.setAttribute('aria-valuenow', String(step));
+          slider.setAttribute('aria-valuetext', levels[step]);
+        }
+      }
+
+      function showQuotaNotice() {
+        clearTimeout(quotaStartTimer);
+        clearTimeout(quotaTimer);
+        quotaStartTimer = setTimeout(() => {
+          thinkingPopover.classList.add('quota-notice');
+          valueLabel.textContent = '更快消耗使用额度';
+          quotaTimer = setTimeout(() => {
+            thinkingPopover.classList.remove('quota-notice');
+            valueLabel.textContent = levels[currentStep];
+          }, 1350);
+        }, 145);
+      }
+
+      function setStep(step, animate = true, allowQuotaNotice = true) {
+        const previousStep = currentStep;
+        currentStep = Math.max(0, Math.min(4, step));
+        clearTimeout(quotaStartTimer);
+        clearTimeout(quotaTimer);
+        thinkingPopover.classList.remove('quota-notice');
+        if (animate) slider.classList.add('snapping');
+        const ratio = stepRatios[currentStep];
+        slider.style.setProperty('--value', `${ratio * 100}%`);
+        renderLevel(currentStep, true);
+        if (allowQuotaNotice && previousStep < 4 && currentStep === 4) showQuotaNotice();
+        if (animate) setTimeout(() => slider.classList.remove('snapping'), 150);
+      }
+
+      slider.addEventListener('pointerdown', event => {
+        if (event.pointerType === 'mouse' && event.button !== 0) return;
+        event.preventDefault();
+        clearTimeout(quotaStartTimer);
+        clearTimeout(quotaTimer);
+        thinkingPopover.classList.remove('quota-notice');
+        dragging = true;
+        activePointerId = event.pointerId;
+        slider.classList.remove('snapping');
+        slider.classList.add('dragging');
+        try { slider.setPointerCapture(event.pointerId); } catch (_) {}
+        paintContinuous(positionFromEvent(event));
+      });
+
+      window.addEventListener('pointermove', event => {
+        if (!dragging || event.pointerId !== activePointerId) return;
+        event.preventDefault();
+        paintContinuous(positionFromEvent(event));
+      }, { passive: false });
+
+      function finishDrag(event) {
+        if (!dragging || event.pointerId !== activePointerId) return;
+        dragging = false;
+        activePointerId = null;
+        slider.classList.remove('dragging');
+        const pointerRatio = positionFromEvent(event);
+        const step = stepRatios.reduce((best, ratio, index) =>
+          Math.abs(ratio - pointerRatio) < Math.abs(stepRatios[best] - pointerRatio) ? index : best, 0);
+        setStep(step, true);
+        try {
+          if (slider.hasPointerCapture(event.pointerId)) slider.releasePointerCapture(event.pointerId);
+        } catch (_) {}
+      }
+
+      window.addEventListener('pointerup', finishDrag);
+      window.addEventListener('pointercancel', event => {
+        if (!dragging || event.pointerId !== activePointerId) return;
+        dragging = false;
+        activePointerId = null;
+        slider.classList.remove('dragging');
+        setStep(currentStep, true);
+      });
+
+      slider.addEventListener('keydown', event => {
+        let next = currentStep;
+        if (event.key === 'ArrowRight' || event.key === 'ArrowUp') next++;
+        else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') next--;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = 4;
+        else return;
+        event.preventDefault();
+        setStep(next, true);
+      });
+
+      function showToast(message) {
+        clearTimeout(toastTimer);
+        toast.textContent = message;
+        toast.classList.add('show');
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 1450);
+      }
+
+      document.querySelector('.send-btn').addEventListener('click', () => showToast('这是动画原型，消息不会真正发送'));
+      setFastMode(false, false);
+      setStep(3, false, false);
+    })();
+  </script>
+</body>
+</html>
