@@ -31,38 +31,41 @@ control's data layer, so the `/model` command and the next request stay in sync.
 
 ## Install
 
-The plugin must be resolvable from a profile directory and mounted with one row.
+This package is a **dsh bundle**: `package.json` declares `dsh.bundle.patch`, so dsh treats
+[`cordis.patch.yml`](cordis.patch.yml) as a composition layer and mounts it for you.
 
-**1. Link it into the profile** (so edits are picked up without reinstalling):
+```sh
+dsh plugin --profile <profile> add dsh-client-ui-gpt-helper
+```
+
+That installs the package into the profile and appends it to the profile's bundle list. The
+profile is watched, so dsh recomposes without a restart. Remove it with
+`dsh plugin --profile <profile> remove dsh-client-ui-gpt-helper`.
+
+### From a local checkout
+
+```sh
+dsh plugin --profile desktop add /absolute/path/to/dsh-client-ui-gpt-helper
+```
+
+### Mounting by hand
+
+Compose [`cordis.patch.yml`](cordis.patch.yml) into the profile's own patch file, and make the
+package resolvable from the profile directory:
 
 ```sh
 pnpm add link:/absolute/path/to/dsh-client-ui-gpt-helper --dir "$DSH_HOME/profiles/desktop"
 ```
 
-**2. Mount it** by appending the row from
-[`examples/cordis.patch.yml`](examples/cordis.patch.yml) to that profile's `cordis.patch.yml`:
-
 ```yaml
+# $DSH_HOME/profiles/<profile>/cordis.patch.yml
 - insert:
     - id: gpt-helper
       name: dsh-client-ui-gpt-helper
 ```
 
-The profile patch is watched, so DSH recomposes without a restart. To uninstall, delete the row
-and run `pnpm remove dsh-client-ui-gpt-helper` in the profile directory.
-
-<details>
-<summary>Mounting without an install</summary>
-
-A patch `insert` row may name a path instead of a package. `dsh` rewrites `./`-relative and
-absolute names to file URLs anchored at the patch file:
-
-```yaml
-- insert:
-    - id: gpt-helper
-      name: './node_modules/dsh-client-ui-gpt-helper/lib/index.js'
-```
-</details>
+A patch `insert` row may also name a path instead of a package — dsh rewrites `./`-relative and
+absolute names to file URLs anchored at the patch file — which needs no install at all.
 
 ## How the takeover works
 
@@ -214,8 +217,8 @@ or the mount row need a page reload.
 ```
 lib/index.js                    host half — an empty apply(), mirroring shipped client-only packages
 lib/client.js                   browser half — styles, locale dictionaries, and the control
+cordis.patch.yml                the bundle layer: the row that mounts the plugin
 scripts/validate-plugin.mjs     structural validator (see Development)
-examples/cordis.patch.yml       the mount row for a profile
 docs/chatgpt-pc-ui-prototype.html   the original design prototype
 ```
 

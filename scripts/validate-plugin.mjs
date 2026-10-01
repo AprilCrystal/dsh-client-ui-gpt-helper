@@ -1,7 +1,7 @@
 // Structural validation for this DSH client plugin.
 // Read-only: asserts the contract the DSH client module system relies on.
 // Usage: node scripts/validate-plugin.mjs [packageDir]   (default: this package)
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const dir = process.argv[2] ?? new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')
@@ -26,6 +26,36 @@ else ok.push(`exports["./client"] -> ${clientExport}`)
 
 if (!manifest.exports?.['.']) fail.push('package.json: exports["."] (host half) is required')
 else ok.push(`exports["."] -> ${manifest.exports['.']}`)
+
+// ── bundle manifest ──────────────────────────────────────────────────────────
+// `dsh.bundle.patch` is the mechanical signal that separates a real dsh bundle
+// from a package that merely carries the topic: it is what lets
+// `dsh plugin add` install the package as a profile layer instead of warning
+// that it is only a plain dependency, and it is what plugin directories check
+// before listing a repository.
+const bundlePatch = manifest.dsh?.bundle?.patch
+if (bundlePatch === undefined) {
+  fail.push('package.json: dsh.bundle.patch is required to install as a profile bundle')
+} else {
+  const patchFiles = typeof bundlePatch === 'string' ? [bundlePatch] : bundlePatch
+  if (!Array.isArray(patchFiles) || patchFiles.length === 0) {
+    fail.push('package.json: dsh.bundle.patch must be a file path or a non-empty list of them')
+  } else {
+    for (const file of patchFiles) {
+      const patchPath = join(dir, file)
+      if (!existsSync(patchPath)) {
+        fail.push(`package.json: dsh.bundle.patch names a missing file: ${file}`)
+        continue
+      }
+      const patchText = readFileSync(patchPath, 'utf8')
+      if (!/^\s*-\s*insert:/m.test(patchText)) {
+        fail.push(`${file}: a bundle layer must contain an "insert" row list`)
+      } else {
+        ok.push(`bundle layer ${file} declares an insert row`)
+      }
+    }
+  }
+}
 
 // ── host half ────────────────────────────────────────────────────────────────
 const hostPath = join(dir, manifest.exports['.'].replace(/^\.\//, ''))

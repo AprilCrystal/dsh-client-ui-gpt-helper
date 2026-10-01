@@ -1,0 +1,12 @@
+# This package's bundle layer.
+#
+# `dsh plugin add dsh-client-ui-gpt-helper` appends these rows to the profile's
+# composition, because package.json declares `dsh.bundle.patch`. Without that
+# declaration dsh installs the package as a plain dependency and warns that it
+# is not a profile layer, leaving the plugin unmounted.
+#
+# The row shadows the shipped composer control; see README for why the shipped
+# package stays enabled.
+- insert:
+    - id: gpt-helper
+      name: dsh-client-ui-gpt-helper
