@@ -47,8 +47,12 @@
   },
   "author": "AprilCrystal",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "validate": "node scripts/validate-plugin.mjs ."
+    "validate": "node scripts/validate-plugin.mjs .",
+    "prepublishOnly": "node scripts/validate-plugin.mjs ."
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "~4.0.4"
