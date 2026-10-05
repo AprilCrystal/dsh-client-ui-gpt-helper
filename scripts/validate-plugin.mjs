@@ -89,12 +89,19 @@ if (!/require\(\s*['"]react['"]\s*\)/.test(browserSrc) && /createElement/.test(b
 // The stylesheet is a JS template literal, so a backtick or a `${` inside it
 // terminates or interpolates it. Both have been introduced by accident while
 // writing CSS comments, so catch them here instead of at `node --check`.
-const cssStart = browserSrc.indexOf('const CSS = `')
-if (cssStart === -1) {
+//
+// The literal is called CSS_TEMPLATE: the sheet is generated from the token table
+// at render time (see `buildCss` in lib/client.js), and the template holds
+// `var(--c-<token>)` markers that the generator substitutes. The markers are plain
+// text to CSS here — they are replaced before the browser ever sees them — so this
+// check stays exactly as strict about backticks and `${`.
+const cssMatch = /const CSS_TEMPLATE = `|const CSS = `/.exec(browserSrc)
+if (cssMatch === null) {
   fail.push(`${clientExport}: could not locate the CSS template literal`)
 } else {
-  const cssEnd = browserSrc.indexOf('`', cssStart + 'const CSS = `'.length)
-  const css = cssEnd === -1 ? '' : browserSrc.slice(cssStart + 'const CSS = `'.length, cssEnd)
+  const bodyStart = cssMatch.index + cssMatch[0].length
+  const cssEnd = browserSrc.indexOf('`', bodyStart)
+  const css = cssEnd === -1 ? '' : browserSrc.slice(bodyStart, cssEnd)
   if (cssEnd === -1) fail.push(`${clientExport}: CSS template literal is unterminated`)
   const strayBacktick = css.includes('`')
   const interpolation = css.includes('${')

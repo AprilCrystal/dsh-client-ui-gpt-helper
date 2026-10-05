@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "hotkey": "Ctrl+Shift+Alt+G",
+  "colors": {
+    "trigger.bolt": "#5eead4",
+    "trigger.model": "#f8fafc",
+    "trigger.level": "#f0abfc",
+    "trigger.levelMax": "#fda4af",
+    "trigger.caret": "#94a3b8",
+    "trigger.lockMark": "#fde047",
+
+    "menu.bolt": "#5eead4",
+    "menu.boltLit": "#f472b6",
+    "menu.level": "#e879f9",
+    "menu.levelMax": "#fb7185",
+    "menu.levelGrad": "linear-gradient(90deg, #67e8f9, #a78bfa 45%, #f472b6 100%)",
+    "menu.quota": "#fdba74",
+    "menu.quotaGrad": "linear-gradient(90deg, #fbbf24, #fda4af)",
+
+    "slider.track": "#3f3f46",
+    "slider.fill": "#f472b6",
+    "slider.fillGrad": "linear-gradient(90deg, #22d3ee 0%, #818cf8 38%, #a855f7 68%, #ec4899 100%)",
+    "slider.thumb": "#f8fafc",
+    "slider.tick": "#94a3b8",
+    "slider.tickPast": "rgba(255,255,255,.5)",
+    "slider.tickCurrent": "rgba(255,255,255,.55)",
+    "slider.particle": "#7ef9ff",
+    "slider.particleGlow": "rgba(126,249,255,.8)",
+    "slider.particleIdle": "#f0abfc",
+    "slider.particleIdleGlow": "rgba(240,171,252,.35)"
+  }
+}

@@ -1,7 +1,7 @@
 {
   "name": "dsh-client-ui-gpt-helper",
-  "version": "0.1.0",
-  "description": "ChatGPT-desktop-style model selection and thinking-level control for the DeepSeek Harness Web composer, with an animated fast-mode particle trail",
+  "version": "0.2.0",
+  "description": "ChatGPT-desktop-style model selection and thinking-level control for the DeepSeek Harness Web composer, with an animated fast-mode particle trail, a persistent fast-mode lock, and themeable colours",
   "type": "module",
   "exports": {
     ".": "./lib/index.js",
@@ -35,7 +35,8 @@
     "ui",
     "composer",
     "model-selection",
-    "reasoning-effort"
+    "reasoning-effort",
+    "theming"
   ],
   "repository": {
     "type": "git",
@@ -52,7 +53,11 @@
   },
   "scripts": {
     "validate": "node scripts/validate-plugin.mjs .",
-    "prepublishOnly": "node scripts/validate-plugin.mjs ."
+    "selfcheck": "node scripts/selfcheck.mjs",
+    "contrast": "node scripts/contrast.mjs",
+    "loadcheck": "node scripts/loadcheck.mjs",
+    "check": "npm run validate && npm run loadcheck && npm run selfcheck && npm run contrast",
+    "prepublishOnly": "npm run check"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "~4.0.4"
