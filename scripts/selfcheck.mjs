@@ -315,15 +315,23 @@ check(
 const shipped = api.buildCss({ colors: {}, hotkey: 'x' })
 check('the generated sheet keeps no colour placeholder', !shipped.includes('var(--c-'))
 check('the generated sheet paints the track with a literal', shipped.includes('background: #e8e7e8'))
-check('the generated sheet paints the thumb with a literal', shipped.includes('background: #fcfcfd'))
-check('the generated sheet paints a tick with a literal', shipped.includes('background: #aaaeb4'))
+// The thumb and the tick are the two tokens that used to be near-white on BOTH sides,
+// which made them vanish into the light track. Each side now has its own value.
+check('the generated sheet paints the light thumb with a literal', shipped.includes('background: #fdfdfe'))
+check('the generated sheet paints the light tick with a literal', shipped.includes('background: #8b8f96'))
+check(
+  'the generated sheet paints the dark thumb with its own literal',
+  shipped.includes('background: #d7d9de'),
+)
+check('the generated sheet paints a tick with a literal', shipped.includes('background: #c9ccd2'))
 const withOverride = api.buildCss({ colors: { 'slider.track': '#ff8800' }, hotkey: 'x' })
 check(
   'an override reaches the generated sheet',
   withOverride.includes('background: #ff8800') && !withOverride.includes('background: #e8e7e8'),
 )
-check('an override leaves the other colours shipped',
-  withOverride.includes('background: #fcfcfd') && withOverride.includes('background: #5184f4'),
+check(
+  'an override leaves the other colours shipped',
+  withOverride.includes('background: #fdfdfe') && withOverride.includes('background: #5184f4'),
 )
 // DSH's own theme tokens legitimately stay as var() — they belong to the host and
 // resolve fine. What must never survive is a reference to one of OUR colour tokens.
@@ -444,10 +452,12 @@ check(
 )
 check(
   'a row names the shipped colour',
-  rowFor('trigger.model').props.children[2].props.placeholder === '#ffffff',
+  rowFor('trigger.model').props.children[2].props.placeholder === '#242527',
   rowFor('trigger.model').props.children[2].props.placeholder,
 )
-check('a row shows the shipped colour', rowFor('trigger.model').props.children[2].props.value === '#ffffff')
+// The row shows the LIGHT literal while no override exists; the dark side is a separate
+// declaration in the generated sheet, not a second value in the field.
+check('a row shows the shipped colour', rowFor('trigger.model').props.children[2].props.value === '#242527')
 check(
   'a theme-neutral row names the same value',
   rowFor('slider.track').props.children[2].props.placeholder === '#e8e7e8',

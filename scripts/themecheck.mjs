@@ -26,8 +26,15 @@ const check = (name, ok, detail) => {
 
 // ── the token names, read as text ───────────────────────────────────────────
 const source = readFileSync('lib/client.js', 'utf8')
-const keys = [...source.matchAll(/\{ key: '([^']+)', group: '/g)].map((match) => match[1])
+// Matched on `key` and `group` only, so the shape of the entry between them is not
+// something this check can be broken by. An earlier pattern required them to be
+// adjacent, which a one-line entry with a `value` in between silently defeated.
+const keys = [...source.matchAll(/\{\s*key:\s*'([^']+)'\s*,\s*group:/g)].map((match) => match[1])
 check('the plugin declares 24 tokens', keys.length === 24, String(keys.length))
+if (keys.length !== 24) {
+  console.log(`FAILED: could not read the token table — found ${keys.length} entries`)
+  process.exitCode = 1
+}
 
 // ── colour maths (WCAG relative luminance) ──────────────────────────────────
 const parse = (value) => {
