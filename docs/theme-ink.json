@@ -1,30 +1,34 @@
 {
   "version": 1,
-  "name": "墨夜",
-  "colors": {
-    "trigger.bolt": "#c9ccd4",
-    "trigger.model": "#ffffff",
-    "trigger.level": "#d4b06a",
-    "trigger.levelMax": "#8fb4c9",
-    "trigger.caret": "#8d929c",
-    "trigger.lockMark": "#e0b357",
-    "menu.bolt": "#d4b06a",
-    "menu.boltLit": "#e8c886",
-    "menu.level": "#e8c886",
-    "menu.levelMax": "#9dc0d4",
-    "menu.levelGrad": "linear-gradient(90deg, #e8c886, #d4b06a 50%, #9dc0d4)",
-    "menu.quota": "#c0a3d4",
-    "menu.quotaGrad": "linear-gradient(90deg, #e8c886, #c0a3d4)",
-    "slider.track": "#2b2e33",
-    "slider.fill": "#d4b06a",
-    "slider.fillGrad": "linear-gradient(90deg, #e8c886 0%, #d4b06a 46%, #a88b4a 100%)",
-    "slider.thumb": "#f2f3f5",
-    "slider.tick": "#8a8f98",
-    "slider.tickPast": "rgba(255,255,255,.45)",
-    "slider.tickCurrent": "rgba(255,255,255,.55)",
-    "slider.particle": "#f5e6c4",
-    "slider.particleGlow": "rgba(232,200,134,.85)",
-    "slider.particleIdle": "#dbc38e",
-    "slider.particleIdleGlow": "rgba(219,195,142,.35)"
+  "schemes": {
+    "墨夜": {
+      "name": "墨夜",
+      "colors": {
+        "trigger.bolt": "#c9ccd4",
+        "trigger.model": "#ffffff",
+        "trigger.level": "#d4b06a",
+        "trigger.levelMax": "#8fb4c9",
+        "trigger.caret": "#8d929c",
+        "trigger.lockMark": "#e0b357",
+        "menu.bolt": "#d4b06a",
+        "menu.boltLit": "#e8c886",
+        "menu.level": "#e8c886",
+        "menu.levelMax": "#9dc0d4",
+        "menu.levelGrad": "linear-gradient(90deg, #e8c886, #d4b06a 50%, #9dc0d4)",
+        "menu.quota": "#c0a3d4",
+        "menu.quotaGrad": "linear-gradient(90deg, #e8c886, #c0a3d4)",
+        "slider.track": "#2b2e33",
+        "slider.fill": "#d4b06a",
+        "slider.fillGrad": "linear-gradient(90deg, #e8c886 0%, #d4b06a 46%, #a88b4a 100%)",
+        "slider.thumb": "#f2f3f5",
+        "slider.tick": "#8a8f98",
+        "slider.tickPast": "rgba(255,255,255,.45)",
+        "slider.tickCurrent": "rgba(255,255,255,.55)",
+        "slider.particle": "#f5e6c4",
+        "slider.particleGlow": "rgba(232,200,134,.85)",
+        "slider.particleIdle": "#dbc38e",
+        "slider.particleIdleGlow": "rgba(219,195,142,.35)"
+      }
+    }
   }
 }

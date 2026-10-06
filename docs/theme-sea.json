@@ -1,52 +1,63 @@
 {
   "version": 1,
-  "name": "海",
-  "colors": {
-    "trigger.bolt": "#55636b",
-    "trigger.model": "#182026",
-    "trigger.level": "#0e6e8c",
-    "trigger.levelMax": "#7c3aed",
-    "trigger.caret": "#6d7a82",
-    "trigger.lockMark": "#0369a1",
-
-    "menu.bolt": "#a5f3fc",
-    "menu.boltLit": "#67e8f9",
-    "menu.level": "#22d3ee",
-    "menu.levelMax": "#a78bfa",
-    "menu.levelGrad": "linear-gradient(90deg, #67e8f9, #38bdf8 50%, #a78bfa)",
-    "menu.quota": "#7dd3fc",
-    "menu.quotaGrad": "linear-gradient(90deg, #22d3ee, #818cf8)",
-
-    "slider.track": "#e2eef3",
-    "slider.fill": "#0e7490",
-    "slider.fillGrad": "linear-gradient(90deg, #22d3ee 0%, #0284c7 48%, #4338ca 100%)",
-    "slider.thumb": "#f7fdff",
-    "slider.tick": "#8aa6b3",
-    "slider.tickPast": "rgba(255,255,255,.42)",
-    "slider.tickCurrent": "rgba(255,255,255,.5)",
-    "slider.particle": "#d8f7ff",
-    "slider.particleGlow": "rgba(103,232,249,.8)",
-    "slider.particleIdle": "#a5f3fc",
-    "slider.particleIdleGlow": "rgba(165,243,252,.35)"
-  },
-  "overrides": {
-    "dark": {
-      "trigger.bolt": "#c2d3da",
-      "trigger.model": "#ffffff",
-      "trigger.level": "#67e8f9",
-      "trigger.levelMax": "#a78bfa",
-      "trigger.caret": "#93a5ad",
-      "trigger.lockMark": "#38bdf8",
-
-      "slider.track": "#22333c",
-      "slider.fill": "#22d3ee",
-      "slider.fillGrad": "linear-gradient(90deg, #a5f3fc 0%, #22d3ee 48%, #818cf8 100%)",
-      "slider.thumb": "#f2fdff",
-      "slider.tick": "#5d7684",
-      "slider.particle": "#e0fbff",
-      "slider.particleGlow": "rgba(125,211,252,.85)",
-      "slider.particleIdle": "#67e8f9",
-      "slider.particleIdleGlow": "rgba(103,232,249,.35)"
+  "schemes": {
+    "海 · 浅色": {
+      "name": "海 · 浅色",
+      "colors": {
+        "trigger.bolt": "#55636b",
+        "trigger.model": "#182026",
+        "trigger.level": "#0e6e8c",
+        "trigger.levelMax": "#7c3aed",
+        "trigger.caret": "#6d7a82",
+        "trigger.lockMark": "#0369a1",
+        "menu.bolt": "#a5f3fc",
+        "menu.boltLit": "#67e8f9",
+        "menu.level": "#22d3ee",
+        "menu.levelMax": "#a78bfa",
+        "menu.levelGrad": "linear-gradient(90deg, #67e8f9, #38bdf8 50%, #a78bfa)",
+        "menu.quota": "#7dd3fc",
+        "menu.quotaGrad": "linear-gradient(90deg, #22d3ee, #818cf8)",
+        "slider.track": "#e2eef3",
+        "slider.fill": "#0e7490",
+        "slider.fillGrad": "linear-gradient(90deg, #22d3ee 0%, #0284c7 48%, #4338ca 100%)",
+        "slider.thumb": "#f7fdff",
+        "slider.tick": "#8aa6b3",
+        "slider.tickPast": "rgba(255,255,255,.42)",
+        "slider.tickCurrent": "rgba(255,255,255,.5)",
+        "slider.particle": "#d8f7ff",
+        "slider.particleGlow": "rgba(103,232,249,.8)",
+        "slider.particleIdle": "#a5f3fc",
+        "slider.particleIdleGlow": "rgba(165,243,252,.35)"
+      }
+    },
+    "海 · 深色": {
+      "name": "海 · 深色",
+      "colors": {
+        "trigger.bolt": "#c2d3da",
+        "trigger.model": "#ffffff",
+        "trigger.level": "#67e8f9",
+        "trigger.levelMax": "#a78bfa",
+        "trigger.caret": "#93a5ad",
+        "trigger.lockMark": "#38bdf8",
+        "menu.bolt": "#a5f3fc",
+        "menu.boltLit": "#67e8f9",
+        "menu.level": "#22d3ee",
+        "menu.levelMax": "#a78bfa",
+        "menu.levelGrad": "linear-gradient(90deg, #67e8f9, #38bdf8 50%, #a78bfa)",
+        "menu.quota": "#7dd3fc",
+        "menu.quotaGrad": "linear-gradient(90deg, #22d3ee, #818cf8)",
+        "slider.track": "#22333c",
+        "slider.fill": "#22d3ee",
+        "slider.fillGrad": "linear-gradient(90deg, #a5f3fc 0%, #22d3ee 48%, #818cf8 100%)",
+        "slider.thumb": "#f2fdff",
+        "slider.tick": "#5d7684",
+        "slider.tickPast": "rgba(255,255,255,.42)",
+        "slider.tickCurrent": "rgba(255,255,255,.5)",
+        "slider.particle": "#e0fbff",
+        "slider.particleGlow": "rgba(125,211,252,.85)",
+        "slider.particleIdle": "#67e8f9",
+        "slider.particleIdleGlow": "rgba(103,232,249,.35)"
+      }
     }
   }
 }

@@ -1,52 +1,63 @@
 {
   "version": 1,
-  "name": "苔",
-  "colors": {
-    "trigger.bolt": "#5c6355",
-    "trigger.model": "#1f2418",
-    "trigger.level": "#3f6212",
-    "trigger.levelMax": "#b45309",
-    "trigger.caret": "#737a6c",
-    "trigger.lockMark": "#15803d",
-
-    "menu.bolt": "#d9f99d",
-    "menu.boltLit": "#bef264",
-    "menu.level": "#a3e635",
-    "menu.levelMax": "#fcd34d",
-    "menu.levelGrad": "linear-gradient(90deg, #bef264, #4ade80 50%, #fcd34d)",
-    "menu.quota": "#fbbf24",
-    "menu.quotaGrad": "linear-gradient(90deg, #fde047, #84cc16)",
-
-    "slider.track": "#eaf0e2",
-    "slider.fill": "#4d7c0f",
-    "slider.fillGrad": "linear-gradient(90deg, #a3e635 0%, #4d7c0f 48%, #166534 100%)",
-    "slider.thumb": "#fbfff4",
-    "slider.tick": "#93a884",
-    "slider.tickPast": "rgba(255,255,255,.42)",
-    "slider.tickCurrent": "rgba(255,255,255,.5)",
-    "slider.particle": "#eaffc4",
-    "slider.particleGlow": "rgba(190,242,100,.8)",
-    "slider.particleIdle": "#d9f99d",
-    "slider.particleIdleGlow": "rgba(217,249,157,.35)"
-  },
-  "overrides": {
-    "dark": {
-      "trigger.bolt": "#cbd5c0",
-      "trigger.model": "#ffffff",
-      "trigger.level": "#bef264",
-      "trigger.levelMax": "#fcd34d",
-      "trigger.caret": "#9aa694",
-      "trigger.lockMark": "#4ade80",
-
-      "slider.track": "#2c3526",
-      "slider.fill": "#a3e635",
-      "slider.fillGrad": "linear-gradient(90deg, #d9f99d 0%, #a3e635 50%, #4ade80 100%)",
-      "slider.thumb": "#f7ffe9",
-      "slider.tick": "#6b7a5f",
-      "slider.particle": "#eeffcd",
-      "slider.particleGlow": "rgba(198,244,120,.85)",
-      "slider.particleIdle": "#bef264",
-      "slider.particleIdleGlow": "rgba(190,242,100,.35)"
+  "schemes": {
+    "苔 · 浅色": {
+      "name": "苔 · 浅色",
+      "colors": {
+        "trigger.bolt": "#5c6355",
+        "trigger.model": "#1f2418",
+        "trigger.level": "#3f6212",
+        "trigger.levelMax": "#b45309",
+        "trigger.caret": "#737a6c",
+        "trigger.lockMark": "#15803d",
+        "menu.bolt": "#d9f99d",
+        "menu.boltLit": "#bef264",
+        "menu.level": "#a3e635",
+        "menu.levelMax": "#fcd34d",
+        "menu.levelGrad": "linear-gradient(90deg, #bef264, #4ade80 50%, #fcd34d)",
+        "menu.quota": "#fbbf24",
+        "menu.quotaGrad": "linear-gradient(90deg, #fde047, #84cc16)",
+        "slider.track": "#eaf0e2",
+        "slider.fill": "#4d7c0f",
+        "slider.fillGrad": "linear-gradient(90deg, #a3e635 0%, #4d7c0f 48%, #166534 100%)",
+        "slider.thumb": "#fbfff4",
+        "slider.tick": "#93a884",
+        "slider.tickPast": "rgba(255,255,255,.42)",
+        "slider.tickCurrent": "rgba(255,255,255,.5)",
+        "slider.particle": "#eaffc4",
+        "slider.particleGlow": "rgba(190,242,100,.8)",
+        "slider.particleIdle": "#d9f99d",
+        "slider.particleIdleGlow": "rgba(217,249,157,.35)"
+      }
+    },
+    "苔 · 深色": {
+      "name": "苔 · 深色",
+      "colors": {
+        "trigger.bolt": "#cbd5c0",
+        "trigger.model": "#ffffff",
+        "trigger.level": "#bef264",
+        "trigger.levelMax": "#fcd34d",
+        "trigger.caret": "#9aa694",
+        "trigger.lockMark": "#4ade80",
+        "menu.bolt": "#d9f99d",
+        "menu.boltLit": "#bef264",
+        "menu.level": "#a3e635",
+        "menu.levelMax": "#fcd34d",
+        "menu.levelGrad": "linear-gradient(90deg, #bef264, #4ade80 50%, #fcd34d)",
+        "menu.quota": "#fbbf24",
+        "menu.quotaGrad": "linear-gradient(90deg, #fde047, #84cc16)",
+        "slider.track": "#2c3526",
+        "slider.fill": "#a3e635",
+        "slider.fillGrad": "linear-gradient(90deg, #d9f99d 0%, #a3e635 50%, #4ade80 100%)",
+        "slider.thumb": "#f7ffe9",
+        "slider.tick": "#6b7a5f",
+        "slider.tickPast": "rgba(255,255,255,.42)",
+        "slider.tickCurrent": "rgba(255,255,255,.5)",
+        "slider.particle": "#eeffcd",
+        "slider.particleGlow": "rgba(198,244,120,.85)",
+        "slider.particleIdle": "#bef264",
+        "slider.particleIdleGlow": "rgba(190,242,100,.35)"
+      }
     }
   }
 }
