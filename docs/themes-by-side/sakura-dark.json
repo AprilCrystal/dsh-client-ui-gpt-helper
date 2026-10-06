@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "name": "樱 · 深色",
+  "colors": {
+    "trigger.bolt": "#d8c6cd",
+    "trigger.model": "#ffffff",
+    "trigger.level": "#f5a9c6",
+    "trigger.levelMax": "#fda4af",
+    "trigger.caret": "#a89aa0",
+    "trigger.lockMark": "#fb7185",
+    "menu.bolt": "#fbcfe8",
+    "menu.boltLit": "#f9a8d4",
+    "menu.level": "#f0abfc",
+    "menu.levelMax": "#fda4af",
+    "menu.levelGrad": "linear-gradient(90deg, #f9a8d4, #e879f9 50%, #fda4af)",
+    "menu.quota": "#fdba74",
+    "menu.quotaGrad": "linear-gradient(90deg, #fbbf24, #fda4af)",
+    "slider.track": "#3c2831",
+    "slider.fill": "#f472b6",
+    "slider.fillGrad": "linear-gradient(90deg, #e879f9 0%, #f472b6 52%, #fb7185 100%)",
+    "slider.thumb": "#fff5fa",
+    "slider.tick": "#7d5a68",
+    "slider.tickPast": "rgba(255,255,255,.42)",
+    "slider.tickCurrent": "rgba(255,255,255,.5)",
+    "slider.particle": "#ffe4f1",
+    "slider.particleGlow": "rgba(255,190,225,.85)",
+    "slider.particleIdle": "#f9a8d4",
+    "slider.particleIdleGlow": "rgba(249,168,212,.35)"
+  }
+}

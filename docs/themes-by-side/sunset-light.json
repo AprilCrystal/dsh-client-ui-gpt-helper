@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "name": "日落金",
+  "name": "日落金 · 浅色",
   "colors": {
     "trigger.bolt": "#6b5a3c",
     "trigger.model": "#241f18",
@@ -8,7 +8,6 @@
     "trigger.levelMax": "#a8410f",
     "trigger.caret": "#7a6e5c",
     "trigger.lockMark": "#b91c1c",
-
     "menu.bolt": "#f0b429",
     "menu.boltLit": "#ffc857",
     "menu.level": "#ffc857",
@@ -16,7 +15,6 @@
     "menu.levelGrad": "linear-gradient(90deg, #ffe08a, #ffb454 48%, #ff7a59)",
     "menu.quota": "#ff9e64",
     "menu.quotaGrad": "linear-gradient(90deg, #ffd166, #ff7a59)",
-
     "slider.track": "#efe6d5",
     "slider.fill": "#b45309",
     "slider.fillGrad": "linear-gradient(90deg, #f0b429 0%, #d97706 46%, #b45309 100%)",
@@ -28,27 +26,5 @@
     "slider.particleGlow": "rgba(240,180,41,.8)",
     "slider.particleIdle": "#ffd8a8",
     "slider.particleIdleGlow": "rgba(255,216,168,.35)"
-  },
-  "overrides": {
-    "dark": {
-      "trigger.bolt": "#f0b429",
-      "trigger.model": "#e8e6e3",
-      "trigger.level": "#ffc857",
-      "trigger.levelMax": "#ff8a5b",
-      "trigger.caret": "#9b948c",
-      "trigger.lockMark": "#ff6b6b",
-
-      "slider.track": "#3a332b",
-      "slider.fill": "#f0b429",
-      "slider.fillGrad": "linear-gradient(90deg, #ffe08a 0%, #ffc857 34%, #ff9e64 68%, #ff6b6b 100%)",
-      "slider.thumb": "#fffaf0",
-      "slider.tick": "#5a5145",
-      "slider.tickPast": "rgba(48,36,20,.55)",
-      "slider.tickCurrent": "rgba(48,36,20,.62)",
-      "slider.particle": "#fff3d1",
-      "slider.particleGlow": "rgba(255,214,120,.85)",
-      "slider.particleIdle": "#ffd8a8",
-      "slider.particleIdleGlow": "rgba(255,216,168,.35)"
-    }
   }
 }

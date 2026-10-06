@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "name": "苔 · 浅色",
+  "colors": {
+    "trigger.bolt": "#5c6355",
+    "trigger.model": "#1f2418",
+    "trigger.level": "#3f6212",
+    "trigger.levelMax": "#b45309",
+    "trigger.caret": "#737a6c",
+    "trigger.lockMark": "#15803d",
+    "menu.bolt": "#d9f99d",
+    "menu.boltLit": "#bef264",
+    "menu.level": "#a3e635",
+    "menu.levelMax": "#fcd34d",
+    "menu.levelGrad": "linear-gradient(90deg, #bef264, #4ade80 50%, #fcd34d)",
+    "menu.quota": "#fbbf24",
+    "menu.quotaGrad": "linear-gradient(90deg, #fde047, #84cc16)",
+    "slider.track": "#eaf0e2",
+    "slider.fill": "#4d7c0f",
+    "slider.fillGrad": "linear-gradient(90deg, #a3e635 0%, #4d7c0f 48%, #166534 100%)",
+    "slider.thumb": "#fbfff4",
+    "slider.tick": "#93a884",
+    "slider.tickPast": "rgba(255,255,255,.42)",
+    "slider.tickCurrent": "rgba(255,255,255,.5)",
+    "slider.particle": "#eaffc4",
+    "slider.particleGlow": "rgba(190,242,100,.8)",
+    "slider.particleIdle": "#d9f99d",
+    "slider.particleIdleGlow": "rgba(217,249,157,.35)"
+  }
+}
