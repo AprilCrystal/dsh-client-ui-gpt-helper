@@ -322,21 +322,41 @@ check(
 // sheet must contain no `var(--c-…)` at all once it has been built.
 const shipped = api.buildCss({ sides: { light: {}, dark: {} }, hotkey: 'x' })
 check('the generated sheet keeps no colour placeholder', !shipped.includes('var(--c-'))
-check('the generated sheet paints the track with a literal', shipped.includes('background: #e8e7e8'))
+check('the generated sheet paints the track with a literal', shipped.includes('background: #e4e3e4'))
 // The thumb and the tick are the two tokens that used to be near-white on BOTH sides,
 // which made them vanish into the light track. Each side now has its own value.
 check('the generated sheet paints the light thumb with a literal', shipped.includes('background: #fdfdfe'))
-check('the generated sheet paints the light tick with a literal', shipped.includes('background: #8b8f96'))
+check('the generated sheet paints the light tick with a literal', shipped.includes('background: #9aa0a8'))
 check(
   'the generated sheet paints the dark thumb with its own literal',
   shipped.includes('background: #d7d9de'),
 )
 check('the generated sheet paints a tick with a literal', shipped.includes('background: #c9ccd2'))
+// The dots and particles ride ON the blue fill, so they are light on BOTH sides. Only the
+// opaque `tick` — the level the fill has NOT reached — follows the side. Getting this
+// backwards is what made the light theme show dark speckles on the fill.
+const sliderTokens = new Map(api.COLOR_TOKENS.map((token) => [token.key, token]))
+const overlayKeys = ['slider.tickPast', 'slider.tickCurrent', 'slider.particle', 'slider.particleGlow']
+check(
+  'the fill overlays are light on both sides',
+  overlayKeys.every(
+    (key) =>
+      /rgba\(255,\s*255,\s*255/.test(sliderTokens.get(key)?.value ?? '') &&
+      /rgba\(255,\s*255,\s*255/.test(sliderTokens.get(key)?.dark ?? ''),
+  ),
+  overlayKeys.map((key) => key + '=' + String(sliderTokens.get(key)?.value)).join(' '),
+)
+check(
+  'the unreached tick follows the side',
+  String(sliderTokens.get('slider.tick')?.value ?? '').startsWith('#') &&
+    sliderTokens.get('slider.tick')?.value !== sliderTokens.get('slider.tick')?.dark,
+  String(sliderTokens.get('slider.tick')?.value) + ' / ' + String(sliderTokens.get('slider.tick')?.dark),
+)
 // An override belongs to ONE side now, which is the whole point of the split.
 const lightOnly = api.buildCss({ sides: { light: { 'slider.track': '#ff8800' }, dark: {} }, hotkey: 'x' })
 check(
   'a light override reaches the generated sheet',
-  lightOnly.includes('background: #ff8800') && !lightOnly.includes('background: #e8e7e8'),
+  lightOnly.includes('background: #ff8800') && !lightOnly.includes('background: #e4e3e4'),
 )
 check(
   'a light override leaves the dark side shipped',
@@ -350,7 +370,7 @@ check(
 const darkOnly = api.buildCss({ sides: { light: {}, dark: { 'slider.track': '#00ff00' } }, hotkey: 'x' })
 check(
   'a dark override stays out of the light side',
-  darkOnly.includes('background: #e8e7e8') && darkOnly.includes('background: #00ff00'),
+  darkOnly.includes('background: #e4e3e4') && darkOnly.includes('background: #00ff00'),
 )
 check(
   'the sides are scoped by the app theme attribute',
@@ -415,7 +435,7 @@ check(
 )
 check(
   'the master switch forces the shipped literal',
-  api.tokenValueFor({ ...withLibrary, paused: true }, 'light', 'slider.track') === '#e8e7e8',
+  api.tokenValueFor({ ...withLibrary, paused: true }, 'light', 'slider.track') === '#e4e3e4',
 )
 check(
   'the master switch keeps the library and the activations',
@@ -557,7 +577,7 @@ check(
 check('a row shows the shipped colour', rowFor('trigger.model').props.children[2].props.value === '#242527')
 check(
   'a theme-neutral row names the same value',
-  rowFor('slider.track').props.children[2].props.placeholder === '#e8e7e8',
+  rowFor('slider.track').props.children[2].props.placeholder === '#e4e3e4',
 )
 check('a gradient row is a text field', rowFor('slider.fillGrad').props['data-field'] === 'text')
 
@@ -575,7 +595,7 @@ const renderedSheet = () => {
   if (Array.isArray(child) && child.every((entry) => typeof entry === 'string')) return child.join('')
   return null
 }
-const isStockSheet = () => renderedSheet()?.includes('background: #e8e7e8') === true
+const isStockSheet = () => renderedSheet()?.includes('background: #e4e3e4') === true
 const rowsOf = (tree) =>
   find(tree, (node) => node.props?.className === 'gptm-configRow').map((row) => ({
     title: row.props.children[0].props.title,
@@ -602,7 +622,7 @@ rowIn(panelTree, 'slider.track').props.children[1].props.onChange({
   target: { value: 'red; } body { display: none' },
 })
 controlTree = renderControl()
-check('an injection attempt is refused', renderedSheet().includes('background: #e8e7e8'))
+check('an injection attempt is refused', renderedSheet().includes('background: #e4e3e4'))
 
 rowIn(panelTree, 'trigger.bolt').props.children[3].props.onClick()
 controlTree = renderControl()
@@ -679,7 +699,7 @@ check(
   Object.prototype.toString.call(find(controlTree, (node) => node.type === 'style')[0]?.props?.children),
 )
 check('the rendered sheet carries no colour placeholder', renderedSheet()?.includes('var(--c-') === false)
-check('the rendered sheet paints the track', renderedSheet()?.includes('background: #e8e7e8') === true)
+check('the rendered sheet paints the track', renderedSheet()?.includes('background: #e4e3e4') === true)
 
 const trigger = byData(controlTree, 'model-effort-trigger')
 check('control renders its trigger', trigger !== undefined)
