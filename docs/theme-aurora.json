@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "name": "极光",
+  "colors": {
+    "trigger.bolt": "#b8ccc6",
+    "trigger.model": "#f2fffc",
+    "trigger.level": "#4fc9a8",
+    "trigger.levelMax": "#a78bfa",
+    "trigger.caret": "#8aa39c",
+    "trigger.lockMark": "#4fd1c5",
+    "menu.bolt": "#6ee7c4",
+    "menu.boltLit": "#6ee7ff",
+    "menu.level": "#6ee7ff",
+    "menu.levelMax": "#c4a3ff",
+    "menu.levelGrad": "linear-gradient(90deg, #6ee7c4, #6ee7ff 45%, #c4a3ff)",
+    "menu.quota": "#8fd4ff",
+    "menu.quotaGrad": "linear-gradient(90deg, #6ee7ff, #a78bfa)",
+    "slider.track": "#1f3330",
+    "slider.fill": "#4fc9a8",
+    "slider.fillGrad": "linear-gradient(90deg, #6ee7c4 0%, #34b9d4 48%, #a78bfa 100%)",
+    "slider.thumb": "#effffb",
+    "slider.tick": "#6f948c",
+    "slider.tickPast": "rgba(255,255,255,.45)",
+    "slider.tickCurrent": "rgba(255,255,255,.55)",
+    "slider.particle": "#d6fff2",
+    "slider.particleGlow": "rgba(110,231,196,.85)",
+    "slider.particleIdle": "#8ff0dc",
+    "slider.particleIdleGlow": "rgba(143,240,220,.35)"
+  }
+}
