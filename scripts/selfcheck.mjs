@@ -232,7 +232,7 @@ const cancelAnimationFrame = () => {}
 // The build marker is defined above the slice point, so it is lifted out too.
 const BUILD = ${JSON.stringify(/const BUILD = '([^']+)'/.exec(source)[1])}
 ${body}
-return { BUILD, COLOR_TOKENS, SIDES, safeColor, normalizeColors, normalizeSides, readHotkey, parseHotkey, hotkeyMatches, normalizeConfig, configToDocument, defaultConfig, buildCss, tokenValue, tokenValueFor, detectSide, THEME_ATTRIBUTE, CONFIG_STORE, FAST_STORE, PANEL_STORE, ConfigPanel, toHexColor, LONG_PRESS_MS, CONFIG_KEY, FAST_KEY, DEFAULT_HOTKEY, ModelEffortControl }
+return { BUILD, COLOR_TOKENS, SIDES, safeColor, normalizeColors, normalizeSides, schemeToDocument, importSchemes, tokenValueFor, readHotkey, parseHotkey, hotkeyMatches, normalizeConfig, configToDocument, defaultConfig, buildCss, tokenValue, tokenValueFor, detectSide, THEME_ATTRIBUTE, CONFIG_STORE, FAST_STORE, PANEL_STORE, ConfigPanel, toHexColor, LONG_PRESS_MS, CONFIG_KEY, FAST_KEY, DEFAULT_HOTKEY, ModelEffortControl }
 `
 
 // ── store handles for the harness ───────────────────────────────────────────
@@ -254,7 +254,15 @@ function makeStore(initial) {
     },
   }
 }
-const configStore = makeStore({ version: 2, sides: { light: {}, dark: {} }, hotkey: 'Ctrl+Shift+Alt+G' })
+const configStore = makeStore({
+  version: 3,
+  hotkey: 'Ctrl+Shift+Alt+G',
+  paused: false,
+  crossApply: null,
+  slots: { light: { scheme: null }, dark: { scheme: null } },
+  schemes: {},
+  sides: { light: {}, dark: {} },
+})
 const fastStore = makeStore({ fast: false, locked: false })
 const panelStore = makeStore({ open: false })
 
@@ -375,16 +383,80 @@ check(
     Object.keys(api.defaultConfig().sides.dark).length === 0,
 )
 check(
-  'configToDocument carries both override tables',
+  'configToDocument carries the whole v3 shape',
   JSON.stringify(api.configToDocument(api.defaultConfig())) ===
-    '{"version":2,"hotkey":"Ctrl+Shift+Alt+G","sides":{"light":{},"dark":{}}}',
+    '{"version":3,"hotkey":"Ctrl+Shift+Alt+G","paused":false,"crossApply":null,' +
+      '"slots":{"light":{"scheme":null},"dark":{"scheme":null}},"schemes":{},"sides":{"light":{},"dark":{}}}',
 )
 // A version 1 document kept ONE flat table, and it applied everywhere. It must become
 // both sides, or a user's palette would change the moment they upgraded.
 const migrated = api.normalizeConfig({ version: 1, hotkey: 'Ctrl+Alt+K', colors: { 'slider.track': '#123456' } })
 check('a v1 flat table becomes both sides', migrated.sides.light['slider.track'] === '#123456' && migrated.sides.dark['slider.track'] === '#123456')
 check('a v1 migration keeps the hotkey', migrated.hotkey === 'Ctrl+Alt+K')
-check('a v2 document round-trips', JSON.stringify(api.normalizeConfig(api.configToDocument(migrated))) === JSON.stringify(migrated))
+check('a v1 migration starts with no library', Object.keys(migrated.schemes).length === 0)
+check('a v3 document round-trips', JSON.stringify(api.normalizeConfig(api.configToDocument(migrated))) === JSON.stringify(migrated))
+
+// ── the scheme library ──────────────────────────────────────────────────────
+// Each side renders the scheme it activated; the master switch overrides both; the
+// cross-apply button lends one side to both WITHOUT clearing either activation.
+const withLibrary = {
+  ...api.defaultConfig(),
+  schemes: {
+    warm: { name: 'warm', colors: { 'slider.track': '#ff8800' } },
+    cold: { name: 'cold', colors: { 'slider.track': '#00ff00' } },
+  },
+  slots: { light: { scheme: 'warm' }, dark: { scheme: 'cold' } },
+}
+check('a side renders its activated scheme', api.tokenValueFor(withLibrary, 'light', 'slider.track') === '#ff8800')
+check('the other side renders its own', api.tokenValueFor(withLibrary, 'dark', 'slider.track') === '#00ff00')
+check(
+  'an untouched token falls back to the shipped literal',
+  api.tokenValueFor(withLibrary, 'light', 'slider.fill') === '#5184f4',
+)
+check(
+  'the master switch forces the shipped literal',
+  api.tokenValueFor({ ...withLibrary, paused: true }, 'light', 'slider.track') === '#e8e7e8',
+)
+check(
+  'the master switch keeps the library and the activations',
+  Object.keys({ ...withLibrary, paused: true }.schemes).length === 2 &&
+    { ...withLibrary, paused: true }.slots.dark.scheme === 'cold',
+)
+const crossed = { ...withLibrary, crossApply: 'light' }
+check('cross-apply lends one side to both', api.tokenValueFor(crossed, 'dark', 'slider.track') === '#ff8800')
+check('cross-apply leaves the activations alone', crossed.slots.dark.scheme === 'cold')
+const tuned = {
+  ...withLibrary,
+  sides: { light: { 'slider.track': '#123456' }, dark: {} },
+}
+check('a per-token tune beats the scheme', api.tokenValueFor(tuned, 'light', 'slider.track') === '#123456')
+check('a tune on one side leaves the other alone', api.tokenValueFor(tuned, 'dark', 'slider.track') === '#00ff00')
+check(
+  'an activation with no scheme in the library is dropped',
+  api.normalizeConfig({ slots: { light: { scheme: 'ghost' } }, schemes: {} }).slots.light.scheme === null,
+)
+check(
+  'a clearing is preserved',
+  api.normalizeConfig({ slots: { dark: { scheme: null } } }).slots.dark.scheme === null,
+)
+
+// Importing a library and a single scheme, with a clash renamed rather than clobbered.
+const importedLibrary = api.importSchemes(api.defaultConfig(), {
+  version: 1,
+  schemes: {
+    one: { colors: { 'slider.track': '#111111' } },
+    two: { name: 'second', colors: { 'slider.track': '#222222' } },
+  },
+})
+check('a library import adds every scheme', importedLibrary.added.length === 2)
+check('an entry keeps its own name', importedLibrary.schemes.second !== undefined)
+const importedOne = api.importSchemes(withLibrary, { version: 1, name: 'warm', colors: { 'slider.track': '#999999' } })
+check('a clashing name is renamed, not overwritten', importedOne.added.join(',') === 'warm (2)', importedOne.added.join(','))
+check('the rename is reported', importedOne.renamed.length === 1)
+check('the original scheme survives', importedOne.schemes.warm.colors['slider.track'] === '#ff8800')
+check('junk imports nothing', api.importSchemes(withLibrary, { nonsense: true }).added.length === 0)
+check('a scheme with no colours is skipped', api.importSchemes(withLibrary, { colors: {} }).added.length === 0)
+check('a scheme exports as its own document', api.schemeToDocument({ name: 'x', colors: { 'slider.fill': '#fff' } }).name === 'x')
 
 // ── hotkey parsing ──────────────────────────────────────────────────────────
 const parsed = api.parseHotkey('Ctrl+Shift+Alt+G')
