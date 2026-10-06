@@ -232,7 +232,7 @@ const cancelAnimationFrame = () => {}
 // The build marker is defined above the slice point, so it is lifted out too.
 const BUILD = ${JSON.stringify(/const BUILD = '([^']+)'/.exec(source)[1])}
 ${body}
-return { BUILD, COLOR_TOKENS, safeColor, normalizeColors, readHotkey, parseHotkey, hotkeyMatches, normalizeConfig, configToDocument, defaultConfig, buildCss, CONFIG_STORE, FAST_STORE, PANEL_STORE, ConfigPanel, toHexColor, LONG_PRESS_MS, CONFIG_KEY, FAST_KEY, DEFAULT_HOTKEY, ModelEffortControl }
+return { BUILD, COLOR_TOKENS, SIDES, safeColor, normalizeColors, normalizeSides, readHotkey, parseHotkey, hotkeyMatches, normalizeConfig, configToDocument, defaultConfig, buildCss, tokenValue, tokenValueFor, detectSide, THEME_ATTRIBUTE, CONFIG_STORE, FAST_STORE, PANEL_STORE, ConfigPanel, toHexColor, LONG_PRESS_MS, CONFIG_KEY, FAST_KEY, DEFAULT_HOTKEY, ModelEffortControl }
 `
 
 // ── store handles for the harness ───────────────────────────────────────────
@@ -254,7 +254,7 @@ function makeStore(initial) {
     },
   }
 }
-const configStore = makeStore({ colors: {}, hotkey: 'Ctrl+Shift+Alt+G' })
+const configStore = makeStore({ version: 2, sides: { light: {}, dark: {} }, hotkey: 'Ctrl+Shift+Alt+G' })
 const fastStore = makeStore({ fast: false, locked: false })
 const panelStore = makeStore({ open: false })
 
@@ -312,7 +312,7 @@ check(
 // The measured root cause of the invisible slider, and the rule it forces: this
 // app's Chromium drops a declaration whose value is only a var(), so the generated
 // sheet must contain no `var(--c-…)` at all once it has been built.
-const shipped = api.buildCss({ colors: {}, hotkey: 'x' })
+const shipped = api.buildCss({ sides: { light: {}, dark: {} }, hotkey: 'x' })
 check('the generated sheet keeps no colour placeholder', !shipped.includes('var(--c-'))
 check('the generated sheet paints the track with a literal', shipped.includes('background: #e8e7e8'))
 // The thumb and the tick are the two tokens that used to be near-white on BOTH sides,
@@ -324,19 +324,34 @@ check(
   shipped.includes('background: #d7d9de'),
 )
 check('the generated sheet paints a tick with a literal', shipped.includes('background: #c9ccd2'))
-const withOverride = api.buildCss({ colors: { 'slider.track': '#ff8800' }, hotkey: 'x' })
+// An override belongs to ONE side now, which is the whole point of the split.
+const lightOnly = api.buildCss({ sides: { light: { 'slider.track': '#ff8800' }, dark: {} }, hotkey: 'x' })
 check(
-  'an override reaches the generated sheet',
-  withOverride.includes('background: #ff8800') && !withOverride.includes('background: #e8e7e8'),
+  'a light override reaches the generated sheet',
+  lightOnly.includes('background: #ff8800') && !lightOnly.includes('background: #e8e7e8'),
 )
 check(
-  'an override leaves the other colours shipped',
-  withOverride.includes('background: #fdfdfe') && withOverride.includes('background: #5184f4'),
+  'a light override leaves the dark side shipped',
+  lightOnly.includes('background: #3a3a3e'),
+  'the dark track literal should still be the shipped one',
+)
+check(
+  'a light override leaves the other colours shipped',
+  lightOnly.includes('background: #fdfdfe') && lightOnly.includes('background: #5184f4'),
+)
+const darkOnly = api.buildCss({ sides: { light: {}, dark: { 'slider.track': '#00ff00' } }, hotkey: 'x' })
+check(
+  'a dark override stays out of the light side',
+  darkOnly.includes('background: #e8e7e8') && darkOnly.includes('background: #00ff00'),
+)
+check(
+  'the sides are scoped by the app theme attribute',
+  darkOnly.includes('html[data-ds-theme-source="dark"]'),
 )
 // DSH's own theme tokens legitimately stay as var() — they belong to the host and
 // resolve fine. What must never survive is a reference to one of OUR colour tokens.
-check('no colour token survives as a var()', !withOverride.includes('var(--c-'))
-check('the sheet keeps DSH theme tokens live', withOverride.includes('var(--dsw-alias-label-primary'))
+check('no colour token survives as a var()', !lightOnly.includes('var(--c-'))
+check('the sheet keeps DSH theme tokens live', lightOnly.includes('var(--dsw-alias-label-primary'))
 
 // ── colour validation ───────────────────────────────────────────────────────
 check('accepts hex', api.safeColor('#ff0000') === '#ff0000')
@@ -354,12 +369,22 @@ check(
 check('normalizeColors drops junk', JSON.stringify(api.normalizeColors({ 'trigger.bolt': 'red;} ' })) === '{}')
 check('normalizeConfig fills the hotkey', api.normalizeConfig({}).hotkey === 'Ctrl+Shift+Alt+G')
 check('normalizeConfig normalizes a stored hotkey', api.normalizeConfig({ hotkey: 'ctrl+alt+k' }).hotkey === 'Ctrl+Alt+K')
-check('defaultConfig carries no overrides', Object.keys(api.defaultConfig().colors).length === 0)
 check(
-  'configToDocument is the editable shape',
-  JSON.stringify(api.configToDocument(api.defaultConfig())) ===
-    '{"version":1,"hotkey":"Ctrl+Shift+Alt+G","colors":{}}',
+  'defaultConfig starts with both sides empty',
+  Object.keys(api.defaultConfig().sides.light).length === 0 &&
+    Object.keys(api.defaultConfig().sides.dark).length === 0,
 )
+check(
+  'configToDocument carries both override tables',
+  JSON.stringify(api.configToDocument(api.defaultConfig())) ===
+    '{"version":2,"hotkey":"Ctrl+Shift+Alt+G","sides":{"light":{},"dark":{}}}',
+)
+// A version 1 document kept ONE flat table, and it applied everywhere. It must become
+// both sides, or a user's palette would change the moment they upgraded.
+const migrated = api.normalizeConfig({ version: 1, hotkey: 'Ctrl+Alt+K', colors: { 'slider.track': '#123456' } })
+check('a v1 flat table becomes both sides', migrated.sides.light['slider.track'] === '#123456' && migrated.sides.dark['slider.track'] === '#123456')
+check('a v1 migration keeps the hotkey', migrated.hotkey === 'Ctrl+Alt+K')
+check('a v2 document round-trips', JSON.stringify(api.normalizeConfig(api.configToDocument(migrated))) === JSON.stringify(migrated))
 
 // ── hotkey parsing ──────────────────────────────────────────────────────────
 const parsed = api.parseHotkey('Ctrl+Shift+Alt+G')
@@ -492,7 +517,14 @@ rowIn(panelTree, 'trigger.bolt').props.children[1].props.onChange({ target: { va
 controlTree = renderControl()
 check('editing a colour rewrites the rendered sheet', renderedSheet().includes('color: #ff0000;'))
 check('editing a colour persists it', storage.get(api.CONFIG_KEY).includes('#ff0000'))
-check('editing one colour leaves the rest alone', api.CONFIG_STORE.getSnapshot().colors['slider.fill'] === undefined)
+check('editing one colour leaves the rest alone', api.CONFIG_STORE.getSnapshot().sides.light['slider.fill'] === undefined)
+// The edit belongs to the side the panel was showing, and the other side is untouched —
+// which is the whole reason the two override tables exist.
+check(
+  'an edit does not leak to the other side',
+  Object.keys(api.CONFIG_STORE.getSnapshot().sides.dark).length === 0,
+  JSON.stringify(api.CONFIG_STORE.getSnapshot().sides.dark),
+)
 
 rowIn(panelTree, 'slider.track').props.children[1].props.onChange({
   target: { value: 'red; } body { display: none' },
@@ -530,7 +562,11 @@ check('the panel has a restore button', resetButton !== undefined, `buttons=${pa
 resetButton.props.onClick()
 controlTree = renderControl()
 check('the full restore puts the stock sheet back', isStockSheet())
-check('the full restore keeps no colours', Object.keys(api.CONFIG_STORE.getSnapshot().colors).length === 0)
+check(
+  'the full restore empties both sides',
+  Object.keys(api.CONFIG_STORE.getSnapshot().sides.light).length === 0 &&
+    Object.keys(api.CONFIG_STORE.getSnapshot().sides.dark).length === 0,
+)
 
 // ── the rendered control ────────────────────────────────────────────────────
 const byData = (tree, value) => find(tree, (node) => node.props?.['data-gpt-helper'] === value)[0]
